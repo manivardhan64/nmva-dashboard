@@ -729,7 +729,27 @@ function odSignOut(){
   odAccount=null;onSignedOut();
 }
 
-function odSaveAndSignIn(){
+async function odSaveAndSignIn(){
+  if(typeof msal==='undefined'){
+    showToast('⚠️ Auth library not loaded. Please hard refresh (Ctrl+Shift+R) and try again.');
+    return;
+  }
+  const el=document.getElementById('od-client-id');
+  const clientId=(el?el.value:'').trim();
+  if(!clientId||clientId.length<30){showToast('⚠️ Please enter a valid Client ID.');return;}
+  localStorage.setItem('nmva_od_client_id',clientId);
+  if(!msalInstance) initMsal(clientId);
+  if(!msalInstance){showToast('❌ Failed to initialize auth. Refresh and try again.');return;}
+  try{
+    const res=await msalInstance.loginPopup({scopes:['Files.ReadWrite','User.Read']});
+    odAccount=res.account;
+    onSignedIn(true);
+    showToast('✅ Signed in! OneDrive sync active.');
+  }catch(e){
+    showToast('❌ Sign-in failed: '+(e.errorMessage||e.message||'Unknown error'));
+    console.error('OD error',e);
+  }
+}
   const el=document.getElementById('od-client-id');
   const clientId=(el?el.value:'').trim();
   if(!clientId||clientId.length<30){showToast('⚠️ Please enter a valid Client ID.');return;}
