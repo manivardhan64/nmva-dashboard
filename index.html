@@ -1486,6 +1486,19 @@ function importBackup(e){
 }
 
 init();
+// Auto-save on card field edits
+document.addEventListener('input', function(e) {
+  const card = e.target.closest('.tracker-card');
+  if (!card) return;
+  const id = card.getAttribute('data-id');
+  const t = trackers.find(x => x.id === id);
+  if (!t) return;
+  if (e.target.classList.contains('card-title')) t.title = e.target.textContent.trim();
+  if (e.target.classList.contains('card-desc')) t.desc = e.target.textContent.trim();
+  if (e.target.classList.contains('card-deadline')) t.due = e.target.textContent.trim();
+  if (e.target.classList.contains('card-clients')) t.clients = e.target.textContent.trim();
+  save();
+});
 </script>
 </body>
 </html>
